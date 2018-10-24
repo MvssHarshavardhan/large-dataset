@@ -1,0 +1,120 @@
+---
+title: "POC"
+output: html_document
+---
+
+```{r}
+#Importing data
+ library(dplyr)
+data.org <- read.csv(file.choose(), stringsAsFactors = T)
+
+```
+ ## loaded the dataset 
+
+```{r}
+#Finding missing values
+sort(colSums(is.na(data.org)),decreasing = TRUE)
+
+```
+
+ ## Checking the missing values and arranged in the increasing order
+
+```{r}
+
+#Removing variables having missing values more than 30%
+data.org <- data.org[, c(-242,-295,-304,-098,-155,-259,-255,-256,-257,-302,-268,-162,-265,-266,-267,-253,-297,-275,-293,-288,-289,-290,-148,-223,-222,-041,-057,-058,-237,-238,-239)]
+
+```                     
+
+ ## And removing variables morethan 30% missing values variables in the dataset 
+
+```{r}
+
+#Removing missing values having unique value
+which(colnames(data.org) == 'x067')
+which(colnames(data.org) == 'x094')
+which(colnames(data.org) == 'x095')
+which(colnames(data.org) == 'x096')
+which(colnames(data.org) == 'x276')
+
+```
+
+ ## Checking the index numbers of variables in the dataset
+
+```{r}
+
+#Removing missing values having unique value
+data.org <- data.org[, c(-64,-91,-92,-93,-253)]
+ 
+```
+
+ ## removing unique value variables in the dataset
+ 
+
+```{r}
+ #Taking 5000 observations from the dataset 
+data.999 <- sample_n(data.org,5000)
+```
+
+ ## Taking 5% sample from the dataset 
+
+```{r}
+#importing the values with 999
+library(dplyr)
+data.999 <- mutate_all(data.999, funs(replace(., is.na(.), 999)))
+```
+
+ ## Imputing missing values with 999 
+
+```{r}
+# install.packages('randomForest')
+library(randomForest)
+set.seed(1234)
+regressor <- randomForest(x= data.999[-269],
+                          y = data.999$y,
+                          ntree = 57)
+
+#Predicting results
+rf_pred  = predict(regressor, newdata = data.999)
+
+```
+
+ ## checking accuracy of the sample data 
+ 
+
+```{r}
+#Calculate RMSE 
+# summarize accuracy
+rmse <- sqrt(mean((data.999$y - rf_pred)^2))
+
+```
+
+ ## And i observed 14% error in the data set using with random forest
+
+
+
+```{r}
+#SVM 
+#install.packages("e1071")
+library(e1071)
+svm_regressor = svm(formula = y ~ .,
+                    data = data.999,
+                    type = 'eps-regression',
+                    kernel = 'radial')
+
+#Predicting results
+svm_pred  = predict(svm_regressor, newdata = data.999)
+```
+
+ ## Checking accuracy of sample data using with  SVM 
+
+```{r}
+#Calculate RMSE 
+# summarize accuracy
+rmse <- sqrt(mean((data.999$y - rf_pred)^2))                 
+```
+ 
+ ## Observation
+ 
+ I observed 14% error in the sample data
+ And I taken 5% of whole dataset and i observed 14% of error ,using with SVM and random forest
